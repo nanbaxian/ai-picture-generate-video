@@ -1,0 +1,52 @@
+{
+  "template": "real-estate",
+  "metadata": {
+    "title": "Luxury Condo",
+    "language": "en"
+  },
+  "video": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30
+  },
+  "voice": {
+    "provider": "edge-tts",
+    "voiceName": "en-CA-ClaraNeural",
+    "speed": 1
+  },
+  "music": {
+    "url": "https://aisocialmediaassets.flashcoding.ca/RedLionProduction%20-%20Short.mp3",
+    "volume": 0.15
+  },
+  "scenes": [
+    {
+      "id": "scene-1",
+      "subtitle": "Luxury Condo In North York",
+      "voiceText": "Welcome to this luxury condo located in the heart of North York.",
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
+          "animation": "zoom-in"
+        },
+        {
+          "type": "image",
+          "url": "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80",
+          "animation": "pan-left"
+        }
+      ]
+    },
+    {
+      "id": "scene-2",
+      "subtitle": "Bright Open Concept Living Room",
+      "voiceText": "The spacious living room offers abundant natural sunlight and a practical open concept layout.",
+      "assets": [
+        {
+          "type": "image",
+          "url": "https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?auto=format&fit=crop&w=1200&q=80",
+          "animation": "zoom-out"
+        }
+      ]
+    }
+  ]
+}

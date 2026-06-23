@@ -1,0 +1,32 @@
+{
+  "name": "ai-picture-generate-video",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc --noEmit",
+    "start": "tsx src/server.ts",
+    "sample": "tsx scripts/submit-sample.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.844.0",
+    "@remotion/bundler": "4.0.482",
+    "@remotion/media-utils": "4.0.482",
+    "@remotion/renderer": "4.0.482",
+    "fastify": "^5.4.0",
+    "nanoid": "^5.1.5",
+    "pino": "^9.7.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "remotion": "4.0.482",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.7",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}
