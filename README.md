@@ -37,7 +37,10 @@ sudo apt-get install -y ffmpeg python3-pip pipx
 pipx ensurepath
 pipx install edge-tts
 ```
-
+set -a
+source .env
+set +a
+pm2 restart ai-picture-generate-video --update-env
 ## Worker Integration Shape
 
 Cloudflare Worker should call:
