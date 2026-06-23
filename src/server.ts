@@ -3,9 +3,12 @@ import { createReadStream } from "node:fs";
 import { mkdir, stat } from "node:fs/promises";
 import path from "node:path";
 import { nanoid } from "nanoid";
+import { z } from "zod";
 import { loadConfig } from "./config.js";
 import { createVideoRequestSchema } from "./domain/videoSchema.js";
+import { listEdgeVoices } from "./render/edgeVoices.js";
 import { createByteRangeStream } from "./render/ffmpegPostprocess.js";
+import { synthesizeVoice } from "./render/tts.js";
 import { RenderQueue } from "./jobs/renderQueue.js";
 import { TaskStore } from "./jobs/taskStore.js";
 import { OutputStorage } from "./storage/outputStorage.js";
@@ -15,13 +18,24 @@ const app = Fastify({ logger: true, bodyLimit: 20 * 1024 * 1024 });
 const store = new TaskStore(path.join(config.workDir, "tasks"));
 const outputStorage = new OutputStorage(config);
 const queue = new RenderQueue(config, store, outputStorage);
+const voicePreviewSchema = z.object({
+  voiceName: z.string().min(1).max(120),
+  text: z.string().trim().min(1).max(240).default("This is a short voice preview for your video."),
+  speed: z.number().positive().max(3).default(1)
+});
 
 await mkdir(config.workDir, { recursive: true });
 await store.init();
 await outputStorage.init();
 
 app.addHook("preHandler", async (request, reply) => {
-  if (!config.apiToken || request.url === "/health" || request.url.startsWith("/videos/") || request.url.startsWith("/work-assets/")) {
+  if (
+    !config.apiToken ||
+    request.url === "/health" ||
+    request.url.startsWith("/videos/") ||
+    request.url.startsWith("/work-assets/") ||
+    request.url.startsWith("/voice-previews/")
+  ) {
     return;
   }
   const header = request.headers.authorization ?? "";
@@ -34,6 +48,37 @@ app.get("/health", async () => ({
   ok: true,
   service: "ai-picture-generate-video"
 }));
+
+app.get("/api/voices", async () => ({
+  provider: "edge-tts",
+  voices: await listEdgeVoices(config.edgeTtsBin)
+}));
+
+app.post("/api/voices/preview", async (request, reply) => {
+  const parsed = voicePreviewSchema.safeParse(request.body);
+  if (!parsed.success) {
+    return reply.code(400).send({
+      error: "Invalid voice preview request",
+      issues: parsed.error.issues
+    });
+  }
+  const previewId = `voice_${nanoid(12)}`;
+  const previewDir = path.join(config.workDir, "voice-previews");
+  const previewPath = path.join(previewDir, `${previewId}.mp3`);
+  await synthesizeVoice({
+    edgeTtsBin: config.edgeTtsBin,
+    allowSilentTts: false,
+    voiceName: parsed.data.voiceName,
+    speed: parsed.data.speed,
+    text: parsed.data.text,
+    outputPath: previewPath
+  });
+  return {
+    provider: "edge-tts",
+    voiceName: parsed.data.voiceName,
+    previewAudioUrl: `${config.publicBaseUrl}/voice-previews/${previewId}.mp3`
+  };
+});
 
 app.post("/api/video/create", async (request, reply) => {
   const parsed = createVideoRequestSchema.safeParse(request.body);
@@ -101,6 +146,17 @@ app.get("/work-assets/:taskId/:fileName", async (request, reply) => {
     return reply.code(400).send({ error: "Invalid work asset" });
   }
   return reply.type("audio/mpeg").send(createReadStream(path.join(config.workDir, taskId, fileName)));
+});
+
+app.get("/voice-previews/:fileName", async (request, reply) => {
+  const { fileName } = request.params as { fileName: string };
+  if (!/^voice_[a-zA-Z0-9_-]+\.mp3$/.test(fileName)) {
+    return reply.code(400).send({ error: "Invalid file name" });
+  }
+  return reply
+    .type("audio/mpeg")
+    .header("Cache-Control", "public, max-age=3600")
+    .send(createReadStream(path.join(config.workDir, "voice-previews", fileName)));
 });
 
 await app.listen({ host: config.host, port: config.port });
