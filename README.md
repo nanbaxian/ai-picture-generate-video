@@ -15,7 +15,7 @@ The request body supports both document variants: `scene.voiceText` and `scene.n
 ```bash
 npm install
 cp .env.example .env
-pipx install edge-tts
+python3 -m pip install --user edge-tts
 npm run dev
 ```
 
@@ -33,14 +33,18 @@ Install Chrome dependencies required by Remotion, CJK fonts for Chinese/Japanese
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y ffmpeg python3-pip pipx fonts-noto-cjk fonts-wqy-zenhei
-pipx ensurepath
-pipx install edge-tts
+sudo apt-get install -y ffmpeg python3-pip fonts-noto-cjk fonts-wqy-zenhei
+python3 -m pip install --user edge-tts
 ```
+Set `EDGE_TTS_BIN` to the executable visible to the service user. Avoid pointing a PM2/systemd service at `/root/.local/bin/edge-tts` unless the service also runs as root and the file is executable.
+
+```bash
 set -a
 source .env
 set +a
 pm2 restart ai-picture-generate-video --update-env
+```
+
 ## Worker Integration Shape
 
 Cloudflare Worker should call:

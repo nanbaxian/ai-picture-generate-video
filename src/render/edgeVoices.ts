@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { runCapture } from "./command.js";
 
 export type EdgeVoice = {
   voiceId: string;
@@ -13,7 +13,7 @@ export type EdgeVoice = {
 };
 
 export async function listEdgeVoices(edgeTtsBin: string): Promise<EdgeVoice[]> {
-  const output = await runCommand(edgeTtsBin, ["--list-voices"]);
+  const output = await runCapture(edgeTtsBin, ["--list-voices"]);
   return parseEdgeVoiceList(output);
 }
 
@@ -67,24 +67,3 @@ function languageLabelFromLocale(locale: string): string {
   return labels[language] ?? locale;
 }
 
-function runCommand(command: string, args: string[]): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const child = spawn(command, args, { stdio: ["ignore", "pipe", "pipe"] });
-    let stdout = "";
-    let stderr = "";
-    child.stdout.on("data", (chunk: Buffer) => {
-      stdout += chunk.toString();
-    });
-    child.stderr.on("data", (chunk: Buffer) => {
-      stderr += chunk.toString();
-    });
-    child.on("error", reject);
-    child.on("close", (code) => {
-      if (code === 0) {
-        resolve(stdout);
-      } else {
-        reject(new Error(`${command} exited with ${code}: ${stderr.slice(0, 600)}`));
-      }
-    });
-  });
-}

@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { runCapture, runCaptureWithStderr } from "./command.js";
 
 export async function getMediaDurationSeconds(filePath: string): Promise<number> {
   const output = await runCapture("ffprobe", [
@@ -36,47 +36,3 @@ export async function assertAudioIsNotSilent(filePath: string): Promise<void> {
   }
 }
 
-function runCapture(command: string, args: string[]): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const child = spawn(command, args, { stdio: ["ignore", "pipe", "pipe"] });
-    let stdout = "";
-    let stderr = "";
-    child.stdout.on("data", (chunk: Buffer) => {
-      stdout += chunk.toString();
-    });
-    child.stderr.on("data", (chunk: Buffer) => {
-      stderr += chunk.toString();
-    });
-    child.on("error", reject);
-    child.on("close", (code) => {
-      if (code === 0) {
-        resolve(stdout);
-      } else {
-        reject(new Error(`${command} exited with ${code}: ${stderr.slice(0, 600)}`));
-      }
-    });
-  });
-}
-
-function runCaptureWithStderr(command: string, args: string[]): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const child = spawn(command, args, { stdio: ["ignore", "pipe", "pipe"] });
-    let stdout = "";
-    let stderr = "";
-    child.stdout.on("data", (chunk: Buffer) => {
-      stdout += chunk.toString();
-    });
-    child.stderr.on("data", (chunk: Buffer) => {
-      stderr += chunk.toString();
-    });
-    child.on("error", reject);
-    child.on("close", (code) => {
-      const output = `${stdout}\n${stderr}`;
-      if (code === 0) {
-        resolve(output);
-      } else {
-        reject(new Error(`${command} exited with ${code}: ${output.slice(0, 600)}`));
-      }
-    });
-  });
-}
