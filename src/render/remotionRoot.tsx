@@ -13,6 +13,20 @@ import {
 import { registerRoot } from "remotion";
 import type { RenderPlan, TimelineAsset, TimelineScene } from "../domain/timeline.js";
 
+const VIDEO_FONT_FAMILY = [
+  '"Noto Sans CJK SC"',
+  '"Noto Sans SC"',
+  '"Microsoft YaHei"',
+  '"SimHei"',
+  '"PingFang SC"',
+  '"Heiti SC"',
+  '"WenQuanYi Micro Hei"',
+  '"Arial Unicode MS"',
+  "Inter",
+  "Arial",
+  "sans-serif"
+].join(", ");
+
 export const RemotionRoot: React.FC = () => {
   return (
     <Composition
@@ -36,7 +50,7 @@ export const RemotionRoot: React.FC = () => {
 const SceneMarketingVideo: React.FC<RenderPlan> = (plan) => {
   const { fps } = useVideoConfig();
   return (
-    <AbsoluteFill style={{ backgroundColor: "#080808", fontFamily: "Inter, Arial, sans-serif" }}>
+    <AbsoluteFill style={{ backgroundColor: "#080808", fontFamily: VIDEO_FONT_FAMILY }}>
       {plan.scenes.map((scene) => (
         <Sequence key={scene.id} from={seconds(scene.start, fps)} durationInFrames={seconds(scene.duration, fps)}>
           <SceneLayer scene={scene} template={plan.template} />
@@ -93,7 +107,10 @@ const Subtitle: React.FC<{ text: string }> = ({ text }) => {
         fontSize: 76,
         lineHeight: 1.08,
         fontWeight: 850,
+        fontFamily: VIDEO_FONT_FAMILY,
         textAlign: "center",
+        wordBreak: "keep-all",
+        overflowWrap: "anywhere",
         textShadow: "0 4px 22px rgba(0,0,0,0.78)",
         backgroundColor: "rgba(0,0,0,0.36)",
         padding: "22px 34px",

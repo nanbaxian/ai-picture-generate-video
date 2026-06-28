@@ -29,11 +29,11 @@ For local development without Edge-TTS, set `VIDEO_ALLOW_SILENT_TTS=1`. Producti
 
 ## Linux Dependencies
 
-Install Chrome dependencies required by Remotion and install Edge-TTS:
+Install Chrome dependencies required by Remotion, CJK fonts for Chinese/Japanese/Korean subtitles, and Edge-TTS:
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y ffmpeg python3-pip pipx
+sudo apt-get install -y ffmpeg python3-pip pipx fonts-noto-cjk fonts-wqy-zenhei
 pipx ensurepath
 pipx install edge-tts
 ```
