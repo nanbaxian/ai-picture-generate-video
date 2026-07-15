@@ -21,6 +21,7 @@ export const sceneSchema = z.object({
 
 export const createVideoRequestSchema = z.object({
   template: z.string().min(1).default("real-estate"),
+  ttsprovider: z.enum(["edgetts", "openvoice"]).default("edgetts"),
   metadata: z.object({
     title: z.string().optional(),
     language: z.string().optional()
@@ -66,6 +67,10 @@ export type NormalizedVideoRequest = Omit<CreateVideoRequest, "scenes"> & {
 export function normalizeVideoRequest(input: CreateVideoRequest): NormalizedVideoRequest {
   return {
     ...input,
+    voice: {
+      ...input.voice,
+      provider: input.ttsprovider === "openvoice" ? "openvoice-v2" : "edge-tts"
+    },
     scenes: input.scenes.map((scene) => ({
       ...scene,
       narration: (scene.narration ?? scene.voiceText ?? "").replace(/\s+/g, " ").trim()

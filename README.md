@@ -39,8 +39,8 @@ Example:
 
 ```json
 {
+  "ttsprovider": "openvoice",
   "voice": {
-    "provider": "openvoice-v2",
     "referenceAudioPath": "/srv/voices/my-voice.wav",
     "language": "ZH",
     "speed": 1
