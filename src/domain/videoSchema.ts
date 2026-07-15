@@ -36,6 +36,7 @@ export const createVideoRequestSchema = z.object({
     voiceName: z.string().min(1).default("en-CA-ClaraNeural"),
     speed: z.number().positive().default(1),
     referenceAudioPath: z.string().min(1).optional(),
+    referenceAudioUrl: z.string().url().optional(),
     language: z.enum(["EN", "ZH", "ES", "FR", "JA", "KO"]).default("EN")
   }).default({ provider: "edge-tts", voiceName: "en-CA-ClaraNeural", speed: 1 }),
   music: z.object({

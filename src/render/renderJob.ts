@@ -1,6 +1,6 @@
 import { bundle } from "@remotion/bundler";
 import { renderMedia, selectComposition } from "@remotion/renderer";
-import { mkdir } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { AppConfig } from "../config.js";
@@ -27,6 +27,7 @@ export async function renderVideoTask(input: {
   await store.update(task.taskId, { status: "processing", progress: 5 });
 
   const request = normalizeVideoRequest(task.request);
+  const referenceAudioPath = await resolveReferenceAudio({ request, taskWorkDir });
   const sceneVoiceUrls: string[] = [];
   const sceneDurations: number[] = [];
 
@@ -40,7 +41,7 @@ export async function renderVideoTask(input: {
       openVoicePython: config.openVoicePython,
       openVoiceScript: config.openVoiceScript,
       openVoiceDir: config.openVoiceDir,
-      referenceAudioPath: request.voice.referenceAudioPath,
+      referenceAudioPath,
       language: request.voice.language,
       allowSilentTts: config.allowSilentTts,
       voiceName: request.voice.voiceName,
@@ -70,6 +71,37 @@ export async function renderVideoTask(input: {
     duration: renderPlan.duration,
     videoUrl
   });
+}
+
+async function resolveReferenceAudio(input: {
+  request: ReturnType<typeof normalizeVideoRequest>;
+  taskWorkDir: string;
+}): Promise<string | undefined> {
+  if (input.request.voice.provider !== "openvoice-v2") {
+    return undefined;
+  }
+  if (input.request.voice.referenceAudioPath) {
+    return input.request.voice.referenceAudioPath;
+  }
+  const referenceAudioUrl = input.request.voice.referenceAudioUrl;
+  if (!referenceAudioUrl) {
+    throw new Error("OpenVoice requires voice.referenceAudioPath or voice.referenceAudioUrl");
+  }
+  const response = await fetch(referenceAudioUrl);
+  if (!response.ok) {
+    throw new Error(`Unable to download OpenVoice reference audio: HTTP ${response.status}`);
+  }
+  const contentLength = Number(response.headers.get("content-length") ?? 0);
+  if (contentLength > 25 * 1024 * 1024) {
+    throw new Error("OpenVoice reference audio must be 25 MB or smaller");
+  }
+  const bytes = Buffer.from(await response.arrayBuffer());
+  if (bytes.length > 25 * 1024 * 1024) {
+    throw new Error("OpenVoice reference audio must be 25 MB or smaller");
+  }
+  const outputPath = path.join(input.taskWorkDir, "openvoice-reference-audio");
+  await writeFile(outputPath, bytes);
+  return outputPath;
 }
 
 async function renderWithRemotion(input: {

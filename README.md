@@ -41,14 +41,17 @@ Example:
 {
   "ttsprovider": "openvoice",
   "voice": {
-    "referenceAudioPath": "/srv/voices/my-voice.wav",
+    "referenceAudioUrl": "https://cdn.example.com/voices/my-voice.wav",
     "language": "ZH",
     "speed": 1
   }
 }
 ```
 
-Only clone voices when you have permission to use the reference recording.
+`referenceAudioUrl` may be an R2 public URL or a short-lived presigned URL. The
+VPS downloads it into the task workspace before running OpenVoice. A local
+`referenceAudioPath` is also supported. Only clone voices when you have
+permission to use the reference recording.
 
 ## Linux Dependencies
 
