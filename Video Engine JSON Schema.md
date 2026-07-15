@@ -2,7 +2,7 @@
 
 This document describes the Linux/VPS rendering API implemented in this repository.
 
-The Cloudflare Worker or any other caller can submit a scene-based JSON payload to the VPS. The VPS renders the video with Edge-TTS, Remotion, and ffmpeg, then returns a task status and final video URL.
+The Cloudflare Worker or any other caller can submit a scene-based JSON payload to the VPS. The VPS renders the video with Edge-TTS or OpenVoice V2, Remotion, and ffmpeg, then returns a task status and final video URL.
 
 ---
 
@@ -27,6 +27,7 @@ Example request:
 ```json
 {
   "template": "real-estate",
+  "ttsprovider": "edgetts",
   "metadata": {
     "title": "Luxury Condo",
     "language": "en"
@@ -37,7 +38,6 @@ Example request:
     "fps": 30
   },
   "voice": {
-    "provider": "edge-tts",
     "voiceName": "en-CA-ClaraNeural",
     "speed": 1.0
   },
@@ -70,6 +70,13 @@ Example request:
   ]
 }
 ```
+
+`ttsprovider` is optional and defaults to `edgetts`. Set it to `openvoice` to
+use OpenVoice V2 voice cloning. For OpenVoice, `voice.referenceAudioUrl` may
+be an R2 public URL or a short-lived presigned URL; the VPS downloads it
+before synthesis. `voice.referenceAudioPath` may be used for a local server
+file. If neither is provided, the server uses
+`OPENVOICE_REFERENCE_AUDIO_PATH`.
 
 Compatibility:
 
@@ -148,9 +155,12 @@ Defaults:
 * `video.width`: `1080`
 * `video.height`: `1920`
 * `video.fps`: `30`
-* `voice.provider`: `edge-tts`
+* `ttsprovider`: `edgetts` or `openvoice`; defaults to `edgetts`
 * `voice.voiceName`: `en-CA-ClaraNeural`
 * `voice.speed`: `1.0`
+* `voice.referenceAudioUrl`: optional OpenVoice reference audio URL
+* `voice.referenceAudioPath`: optional local OpenVoice reference audio path
+* `voice.language`: `EN`, `ZH`, `ES`, `FR`, `JA`, or `KO`
 
 ### Scene
 
@@ -242,11 +252,12 @@ The local video endpoint supports HTTP byte ranges.
 1. Receive `POST /api/video/create`.
 2. Validate JSON with Zod.
 3. Create local task JSON under `WORK_DIR/tasks`.
-4. Generate one Edge-TTS MP3 per scene.
-5. Verify narration audio is not silent.
-6. Measure narration duration with `ffprobe`.
-7. Build scene timeline from narration duration and asset count.
-8. Render with Remotion.
+4. Generate one MP3 per scene with the selected `ttsprovider`.
+5. For OpenVoice URL references, download the reference audio into the task workspace.
+6. Verify narration audio is not silent.
+7. Measure narration duration with `ffprobe`.
+8. Build scene timeline from narration duration and asset count.
+9. Render with Remotion.
 9. Remux with ffmpeg to H.264 + AAC + faststart MP4.
 10. Verify final MP4 audio is not silent.
 11. Publish to R2 or local `/videos`.

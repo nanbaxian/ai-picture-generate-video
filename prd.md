@@ -19,7 +19,7 @@ Implemented:
 * `POST /api/video/create`
 * `GET /api/video/status/:taskId`
 * `GET /health`
-* Edge-TTS narration
+* Edge-TTS or OpenVoice V2 narration
 * Remotion rendering
 * ffmpeg MP4 post-processing
 * Local task storage
@@ -53,7 +53,7 @@ Caller
   -> VPS API
   -> JSON validation
   -> local task store
-  -> Edge-TTS
+  -> selected TTS provider
   -> ffprobe duration measurement
   -> timeline generation
   -> Remotion render
@@ -145,6 +145,7 @@ Video
     "height": 1920,
     "fps": 30
   },
+  "ttsprovider": "edgetts",
   "voice": {
     "provider": "edge-tts",
     "voiceName": "en-CA-ClaraNeural",
@@ -238,7 +239,21 @@ Future:
 
 ## Voice Engine
 
-Current implementation:
+The API supports two providers:
+
+* `edgetts` (default): Microsoft Edge-TTS preset voices.
+* `openvoice`: MeloTTS plus OpenVoice V2 voice cloning.
+
+OpenVoice reference audio resolution order:
+
+1. `voice.referenceAudioPath`
+2. `voice.referenceAudioUrl`
+3. `OPENVOICE_REFERENCE_AUDIO_PATH`
+
+The URL can be an R2 public URL or a short-lived presigned URL. The VPS
+downloads it to the task workspace before generating each scene.
+
+Edge-TTS implementation:
 
 * Provider: Edge-TTS
 * Output: one MP3 per scene
