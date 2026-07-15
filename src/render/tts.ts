@@ -4,6 +4,12 @@ import { runCommand } from "./command.js";
 
 export type TtsInput = {
   edgeTtsBin: string;
+  provider?: "edge-tts" | "openvoice-v2";
+  openVoicePython?: string;
+  openVoiceScript?: string;
+  openVoiceDir?: string;
+  referenceAudioPath?: string;
+  language?: string;
   allowSilentTts: boolean;
   voiceName: string;
   speed: number;
@@ -14,6 +20,15 @@ export type TtsInput = {
 export async function synthesizeVoice(input: TtsInput): Promise<void> {
   await mkdir(path.dirname(input.outputPath), { recursive: true });
   try {
+    if (input.provider === "openvoice-v2") {
+      if (!input.referenceAudioPath) throw new Error("OpenVoice V2 requires voice.referenceAudioPath");
+      await runCommand(input.openVoicePython ?? "python3", [
+        input.openVoiceScript ?? "./scripts/openvoice_tts.py", "--openvoice-dir", input.openVoiceDir ?? "./OpenVoice",
+        "--text", input.text, "--reference", input.referenceAudioPath, "--language", input.language ?? "EN",
+        "--speed", String(input.speed), "--output", input.outputPath
+      ]);
+      return;
+    }
     await runCommand(input.edgeTtsBin, [
       "--voice",
       input.voiceName,

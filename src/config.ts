@@ -6,6 +6,9 @@ export type AppConfig = {
   outputDir: string;
   publicBaseUrl: string;
   edgeTtsBin: string;
+  openVoicePython: string;
+  openVoiceScript: string;
+  openVoiceDir: string;
   allowSilentTts: boolean;
   r2?: {
     endpoint: string;
@@ -34,6 +37,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     outputDir: env.OUTPUT_DIR ?? "./storage/output",
     publicBaseUrl: (env.PUBLIC_BASE_URL ?? `http://localhost:${env.PORT ?? 8080}`).replace(/\/$/, ""),
     edgeTtsBin: env.EDGE_TTS_BIN ?? "edge-tts",
+    openVoicePython: env.OPENVOICE_PYTHON ?? "python3",
+    openVoiceScript: env.OPENVOICE_SCRIPT ?? "./scripts/openvoice_tts.py",
+    openVoiceDir: env.OPENVOICE_DIR ?? "./OpenVoice",
     allowSilentTts: env.VIDEO_ALLOW_SILENT_TTS === "1",
     r2
   };

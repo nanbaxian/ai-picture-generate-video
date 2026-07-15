@@ -67,6 +67,7 @@ app.post("/api/voices/preview", async (request, reply) => {
   const previewPath = path.join(previewDir, `${previewId}.mp3`);
   await synthesizeVoice({
     edgeTtsBin: config.edgeTtsBin,
+    provider: "edge-tts",
     allowSilentTts: false,
     voiceName: parsed.data.voiceName,
     speed: parsed.data.speed,

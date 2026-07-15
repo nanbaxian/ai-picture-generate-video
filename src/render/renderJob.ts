@@ -36,6 +36,12 @@ export async function renderVideoTask(input: {
     const voicePath = path.join(taskWorkDir, `scene-${index + 1}.mp3`);
     await synthesizeVoice({
       edgeTtsBin: config.edgeTtsBin,
+      provider: request.voice.provider,
+      openVoicePython: config.openVoicePython,
+      openVoiceScript: config.openVoiceScript,
+      openVoiceDir: config.openVoiceDir,
+      referenceAudioPath: request.voice.referenceAudioPath,
+      language: request.voice.language,
       allowSilentTts: config.allowSilentTts,
       voiceName: request.voice.voiceName,
       speed: request.voice.speed,

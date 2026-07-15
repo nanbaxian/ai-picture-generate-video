@@ -27,6 +27,29 @@ npm run sample
 
 For local development without Edge-TTS, set `VIDEO_ALLOW_SILENT_TTS=1`. Production should use Edge-TTS.
 
+### OpenVoice V2 voice cloning
+
+Use `provider: "openvoice-v2"` with a clean reference recording. The adapter
+uses MeloTTS for speech and OpenVoice V2 to transfer the reference voice color.
+Install the official OpenVoice V2 checkpoints and dependencies in a Python
+environment, then configure `OPENVOICE_PYTHON`, `OPENVOICE_SCRIPT`, and
+`OPENVOICE_DIR` if the defaults do not apply.
+
+Example:
+
+```json
+{
+  "voice": {
+    "provider": "openvoice-v2",
+    "referenceAudioPath": "/srv/voices/my-voice.wav",
+    "language": "ZH",
+    "speed": 1
+  }
+}
+```
+
+Only clone voices when you have permission to use the reference recording.
+
 ## Linux Dependencies
 
 Install Chrome dependencies required by Remotion, CJK fonts for Chinese/Japanese/Korean subtitles, and Edge-TTS:

@@ -31,9 +31,11 @@ export const createVideoRequestSchema = z.object({
     fps: z.number().int().positive().default(30)
   }).default({ width: 1080, height: 1920, fps: 30 }),
   voice: z.object({
-    provider: z.literal("edge-tts").default("edge-tts"),
+    provider: z.enum(["edge-tts", "openvoice-v2"]).default("edge-tts"),
     voiceName: z.string().min(1).default("en-CA-ClaraNeural"),
-    speed: z.number().positive().default(1)
+    speed: z.number().positive().default(1),
+    referenceAudioPath: z.string().min(1).optional(),
+    language: z.enum(["EN", "ZH", "ES", "FR", "JA", "KO"]).default("EN")
   }).default({ provider: "edge-tts", voiceName: "en-CA-ClaraNeural", speed: 1 }),
   music: z.object({
     url: z.string().url(),
