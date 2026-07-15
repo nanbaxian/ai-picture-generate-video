@@ -9,6 +9,7 @@ export type AppConfig = {
   openVoicePython: string;
   openVoiceScript: string;
   openVoiceDir: string;
+  openVoiceReferenceAudioPath: string;
   allowSilentTts: boolean;
   r2?: {
     endpoint: string;
@@ -40,6 +41,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     openVoicePython: env.OPENVOICE_PYTHON ?? "python3",
     openVoiceScript: env.OPENVOICE_SCRIPT ?? "./scripts/openvoice_tts.py",
     openVoiceDir: env.OPENVOICE_DIR ?? "./OpenVoice",
+    openVoiceReferenceAudioPath: env.OPENVOICE_REFERENCE_AUDIO_PATH ?? "/www/wwwroot/default/voices/demo_man.wav",
     allowSilentTts: env.VIDEO_ALLOW_SILENT_TTS === "1",
     r2
   };

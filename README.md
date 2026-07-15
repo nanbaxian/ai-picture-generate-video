@@ -50,7 +50,8 @@ Example:
 
 `referenceAudioUrl` may be an R2 public URL or a short-lived presigned URL. The
 VPS downloads it into the task workspace before running OpenVoice. A local
-`referenceAudioPath` is also supported. Only clone voices when you have
+`referenceAudioPath` is also supported. If neither is supplied, the server
+uses `OPENVOICE_REFERENCE_AUDIO_PATH`. Only clone voices when you have
 permission to use the reference recording.
 
 ## Linux Dependencies

@@ -27,7 +27,7 @@ export async function renderVideoTask(input: {
   await store.update(task.taskId, { status: "processing", progress: 5 });
 
   const request = normalizeVideoRequest(task.request);
-  const referenceAudioPath = await resolveReferenceAudio({ request, taskWorkDir });
+  const referenceAudioPath = await resolveReferenceAudio({ request, taskWorkDir, defaultPath: config.openVoiceReferenceAudioPath });
   const sceneVoiceUrls: string[] = [];
   const sceneDurations: number[] = [];
 
@@ -76,6 +76,7 @@ export async function renderVideoTask(input: {
 async function resolveReferenceAudio(input: {
   request: ReturnType<typeof normalizeVideoRequest>;
   taskWorkDir: string;
+  defaultPath: string;
 }): Promise<string | undefined> {
   if (input.request.voice.provider !== "openvoice-v2") {
     return undefined;
@@ -84,9 +85,7 @@ async function resolveReferenceAudio(input: {
     return input.request.voice.referenceAudioPath;
   }
   const referenceAudioUrl = input.request.voice.referenceAudioUrl;
-  if (!referenceAudioUrl) {
-    throw new Error("OpenVoice requires voice.referenceAudioPath or voice.referenceAudioUrl");
-  }
+  if (!referenceAudioUrl) return input.defaultPath;
   const response = await fetch(referenceAudioUrl);
   if (!response.ok) {
     throw new Error(`Unable to download OpenVoice reference audio: HTTP ${response.status}`);
